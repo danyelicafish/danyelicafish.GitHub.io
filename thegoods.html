@@ -1,49 +1,97 @@
-* HOME
-home__social
-https://www.linkedin.com/
-https://dribbble.com/
-https://github.com/
+(function () {
+  if (
+    !"mediaDevices" in navigator ||
+    !"getUserMedia" in navigator.mediaDevices
+  ) {
+    alert("Camera API is not available in your browser");
+    return;
+  }
 
-home__description
-High level experience in web design and development knowledge, producing quality work.
+  // get page elements
+  const video = document.querySelector("#video");
+  const btnPlay = document.querySelector("#btnPlay");
+  const btnPause = document.querySelector("#btnPause");
+  const btnScreenshot = document.querySelector("#btnScreenshot");
+  const btnChangeCamera = document.querySelector("#btnChangeCamera");
+  const screenshotsContainer = document.querySelector("#screenshots");
+  const canvas = document.querySelector("#canvas");
+  const devicesSelect = document.querySelector("#devicesSelect");
 
+  // video constraints
+  const constraints = {
+    video: {
+      width: {
+        min: 1280,
+        ideal: 1920,
+        max: 2560,
+      },
+      height: {
+        min: 720,
+        ideal: 1080,
+        max: 1440,
+      },
+    },
+  };
 
-* ABOUT
-about__description
-Web developer, with extensive knowledge and years of experience, working in web technologies and Ui / Ux design, delivering quality work.
+  // use front face camera
+  let useFrontCamera = true;
 
-about__info-name
-Years <br> experience
-Completed <br> project
-Companies <br> worked
+  // current video stream
+  let videoStream;
 
+  // handle events
+  // play
+  btnPlay.addEventListener("click", function () {
+    video.play();
+    btnPlay.classList.add("is-hidden");
+    btnPause.classList.remove("is-hidden");
+  });
 
-* SERVICES
-services__modal-service
-I develop the user interface.
-Web page development.
-I create ux element interactions.
-I position your company brand.
+  // pause
+  btnPause.addEventListener("click", function () {
+    video.pause();
+    btnPause.classList.add("is-hidden");
+    btnPlay.classList.remove("is-hidden");
+  });
 
+  // take screenshot
+  btnScreenshot.addEventListener("click", function () {
+    const img = document.createElement("img");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    img.src = canvas.toDataURL("image/png");
+    screenshotsContainer.prepend(img);
+  });
 
-* PORTFOLIO
-portfolio__description
-Website adaptable to all devices, with ui components and animated interactions.
+  // switch camera
+  btnChangeCamera.addEventListener("click", function () {
+    useFrontCamera = !useFrontCamera;
 
+    initializeCamera();
+  });
 
-* PROJECT
-project__description
-Contact me now and get a 30% discount on your new project.
+  // stop video stream
+  function stopVideoStream() {
+    if (videoStream) {
+      videoStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+  }
 
+  // initialize
+  async function initializeCamera() {
+    stopVideoStream();
+    constraints.video.facingMode = useFrontCamera ? "user" : "environment";
 
-* TESTIMONIAL
-testimonial__description
-I get a good impression, I carry out my project with all the possible quality and attention and support 24 hours a day.
+    try {
+      videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = videoStream;
+    } catch (err) {
+      alert("Could not access the camera");
+    }
+  }
 
-
-* FOOTER
-footer__social
-https://www.facebook.com/
-https://www.instagram.com/
-https://twitter.com/
-
+  initializeCamera();
+})();
